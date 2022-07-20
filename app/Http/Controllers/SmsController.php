@@ -38,6 +38,7 @@ class SmsController extends Controller
             "from" => Config::get('sms.from'),
             "to" => $request->phone,
             "msg" => $request->sms,
+            // "callback_url" => "/api/v1/sms/dlr/holla_tags/94277953-3abb-4f5a-8fdd-68adb898f6cf.2349092951511",
             // "enable_msg_id" => "true"
         ];
 
@@ -49,14 +50,19 @@ class SmsController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //return as a variable
         curl_setopt($ch, CURLOPT_POST, 1); //set POST method
 
-
-        $response = curl_exec($ch); // grab URL and pass it to the browser. Run the whole process and return the response
-        curl_close($ch); //close the curl handle
-
-        if ($response == 'sent') {
-            return redirect('send')->with(['message' => 'SMS sent Successfully']);
+        try {
+            $response = curl_exec($ch); // grab URL and pass it to the browser. Run the whole process and return the response
+            curl_close($ch); //close the curl handle
+        
+            return redirect('send')->with(['message' => $response]);
+        } catch (\Throwable $th) {
+            return redirect('send')->with(['message' => 'Something went wrong. Error: "'. $response . '" occured!' ]);
         }
-        return redirect('send')->with(['message' => 'Something went wrong. Error: "'. $response . '" occured!' ]);
+
+        // if ($response == 'sent') {
+            // return redirect('send')->with(['message' => 'SMS sent Successfully']);
+        // }
+        // return redirect('send')->with(['message' => 'Something went wrong. Error: "'. $response . '" occured!' ]);
     }
 
     public function status(Request $request) {
